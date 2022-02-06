@@ -1,4 +1,5 @@
 import pygame
+from weapon import Weapon
 from settings import *
 from tile import Tile
 from player import Player
@@ -9,12 +10,7 @@ class Level:
 	def __init__(self):
 		self.visible_sprites = YSortCameraGroup()
 		self.obstacle_sprites = pygame.sprite.Group()
-
-		self.create_map()
-
-	def __init__(self):
-		self.visible_sprites = YSortCameraGroup()
-		self.obstacle_sprites = pygame.sprite.Group()
+		self.current_attack = None
 
 		self.create_map()
 
@@ -29,7 +25,7 @@ class Level:
 			'objects': import_folder('../graphics/objects'),
 		}
 
-		self.player = Player((2000, 1430), [self.visible_sprites], self.obstacle_sprites)
+		self.player = Player((2000, 1430), [self.visible_sprites], self.obstacle_sprites, self.create_attack, self.destroy_attack)
 
 		for style, layout in layouts.items():
 			for row_index, row in enumerate(layout):
@@ -43,6 +39,14 @@ class Level:
 							Tile((x, y), [self.visible_sprites, self.obstacle_sprites], style, choice(graphics['grass']))
 						if style == 'object':
 							Tile((x, y), [self.visible_sprites, self.obstacle_sprites], style, graphics['objects'][int(col)])
+
+	def create_attack(self):
+		self.current_attack = Weapon(self.player, [self.visible_sprites])
+
+	def destroy_attack(self):
+		if self.current_attack:
+			self.current_attack.kill()
+			self.current_attack = None
 
 	def run(self):
 		self.visible_sprites.draw(self.player)

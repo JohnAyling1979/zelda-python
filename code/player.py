@@ -3,7 +3,7 @@ from support import import_folder
 from settings import *
 
 class Player(pygame.sprite.Sprite):
-	def __init__(self, pos, groups, obstacle_sprites):
+	def __init__(self, pos, groups, obstacle_sprites, create_attack, destroy_attack):
 		super().__init__(groups)
 
 		self.obstacle_sprites = obstacle_sprites
@@ -23,6 +23,13 @@ class Player(pygame.sprite.Sprite):
 		self.attacking = False
 		self.attack_cooldown = 400
 		self.attack_time = None
+		self.creat_attack = create_attack
+		self.destroy_attack = destroy_attack
+		self.weapon_index = 0
+		self.weapon = list(WEAPON_DATA.keys())[self.weapon_index]
+		self.can_switch_weapon = True
+		self.weapon_switch_time = None
+		self.weapon_switch_cooldown = 200
 
 	def import_player_assets(self):
 		character_path = '../graphics/player/'
@@ -68,14 +75,20 @@ class Player(pygame.sprite.Sprite):
 				self.direction.x = 0
 
 			if keys[pygame.K_SPACE]:
-				print('attack')
 				self.attacking = True
 				self.attack_time = pygame.time.get_ticks()
+				self.creat_attack()
 
 			if keys[pygame.K_RETURN]:
 				print('magic')
 				self.attacking = True
 				self.attack_time = pygame.time.get_ticks()
+
+			if keys[pygame.K_q] and self.can_switch_weapon:
+				self.can_switch_weapon = False
+				self.weapon_switch_time = pygame.time.get_ticks()
+				self.weapon_index = (self.weapon_index + 1) % len(list(WEAPON_DATA.keys()))
+				self.weapon = list(WEAPON_DATA.keys())[self.weapon_index]
 
 	def get_status(self):
 		if self.direction.x == 0 and self.direction.y == 0:
@@ -86,7 +99,7 @@ class Player(pygame.sprite.Sprite):
 			self.direction.x = 0;
 			self.direction.y = 0;
 			if not 'attack' in self.status:
-				self.status = self.status.replace('_idle', '') + '_attack'
+				self.status = self.status.split('_')[0] + '_attack'
 		else:
 			self.status = self.status.replace('_attack', '')
 
@@ -122,13 +135,14 @@ class Player(pygame.sprite.Sprite):
 
 		if self.attacking and current_time - self.attack_time >= self.attack_cooldown:
 			self.attacking = False
+			self.destroy_attack()
+
+		if not self.can_switch_weapon and current_time - self.weapon_switch_time >= self.weapon_switch_cooldown:
+			self.can_switch_weapon = True
 
 	def animate(self):
 		animation = self.animations[self.status]
-		self.fram_index += self.animation_speed
-
-		if self.fram_index >= len(animation):
-			self.fram_index = 0
+		self.fram_index = (self.fram_index + self.animation_speed) % len(animation)
 
 		self.image = animation[int(self.fram_index)]
 		self.rect = self.image.get_rect(center = self.hitbox.center)
