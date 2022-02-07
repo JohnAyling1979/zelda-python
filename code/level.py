@@ -12,6 +12,7 @@ class Level:
 		self.visible_sprites = YSortCameraGroup()
 		self.obstacle_sprites = pygame.sprite.Group()
 		self.current_attack = None
+		self.current_magic = None
 
 		self.create_map()
 
@@ -28,7 +29,15 @@ class Level:
 			'objects': import_folder('../graphics/objects'),
 		}
 
-		self.player = Player((2000, 1430), [self.visible_sprites], self.obstacle_sprites, self.create_attack, self.destroy_attack)
+		self.player = Player(
+			(2000, 1430),
+			[self.visible_sprites],
+			self.obstacle_sprites,
+			self.create_attack,
+			self.destroy_attack,
+			self.create_magic,
+			self.destroy_magic
+		)
 
 		for style, layout in layouts.items():
 			for row_index, row in enumerate(layout):
@@ -50,6 +59,16 @@ class Level:
 		if self.current_attack:
 			self.current_attack.kill()
 			self.current_attack = None
+
+	def create_magic(self, style, strength, cost):
+		print(style)
+		print(strength)
+		print(cost)
+
+	def destroy_magic(self):
+		if self.current_magic:
+			self.current_magic.kill()
+			self.current_magic = None
 
 	def run(self):
 		self.visible_sprites.draw(self.player)
