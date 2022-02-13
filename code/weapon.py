@@ -9,6 +9,7 @@ class Weapon(pygame.sprite.Sprite):
 
 		full_path = f'../graphics/weapons/{player.weapon}/{direction}.png'
 		self.image = pygame.image.load(full_path).convert_alpha()
+		self.sprite_type = 'weapon'
 
 		if (direction == 'up'):
 			self.rect = self.image.get_rect(midbottom = player.rect.midtop + pygame.math.Vector2(-10, 0))
