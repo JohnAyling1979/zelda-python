@@ -50,6 +50,9 @@ class Player(Entity):
 	def get_full_weapon_damage(self):
 		return self.stats['attack'] + WEAPON_DATA[self.weapon]['damage']
 
+	def get_full_magic_damage(self):
+		return self.stats['magic'] + MAGIC_DATA[self.magic]['strength']
+
 	def import_player_assets(self):
 		character_path = '../graphics/player/'
 		self.animations = {
@@ -159,9 +162,14 @@ class Player(Entity):
 		if not self.vulnerable and current_time - self.hurt_time >= self.invulnerability:
 			self.vulnerable = True
 
+	def energy_recovery(self):
+		if 'idle' in self.status and self.energy < self.stats['energy']:
+			self.energy += .01 * self.stats['magic']
+
 	def update(self):
 		self.input()
 		self.cooldowns()
 		self.get_status()
 		self.animate()
 		self.move()
+		self.energy_recovery()
